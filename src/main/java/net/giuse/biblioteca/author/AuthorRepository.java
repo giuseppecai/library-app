@@ -1,4 +1,4 @@
-package net.giuse.biblioteca.Author;
+package net.giuse.biblioteca.author;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

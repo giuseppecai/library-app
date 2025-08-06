@@ -1,4 +1,4 @@
-package net.giuse.biblioteca.Book;
+package net.giuse.biblioteca.book;
 
 import java.util.List;
 

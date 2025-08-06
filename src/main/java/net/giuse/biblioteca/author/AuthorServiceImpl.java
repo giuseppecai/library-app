@@ -1,9 +1,8 @@
-package net.giuse.biblioteca.Author;
+package net.giuse.biblioteca.author;
 
-import net.giuse.biblioteca.Book.Book;
-import net.giuse.biblioteca.Book.BookDTO;
-import net.giuse.biblioteca.Book.BookMapper;
-import net.giuse.biblioteca.Book.BookRepository;
+import net.giuse.biblioteca.book.Book;
+import net.giuse.biblioteca.book.BookMapper;
+import net.giuse.biblioteca.book.BookRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -1,6 +1,6 @@
-package net.giuse.biblioteca.Book;
+package net.giuse.biblioteca.book;
 
-import net.giuse.biblioteca.Author.Author;
+import net.giuse.biblioteca.author.Author;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

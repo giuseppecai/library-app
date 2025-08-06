@@ -1,33 +1,26 @@
-package net.giuse.biblioteca.Book;
-
-import jakarta.persistence.*;
-import net.giuse.biblioteca.Author.Author;
+package net.giuse.biblioteca.book;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
-@Entity
-public class Book {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class BookDTO {
     private Long id;
     private String title;
     private String isbn;
     private LocalDate publicationDate;
     private Boolean available;
-    @ManyToOne
-    @JoinColumn(name = "author_id")
-    private Author author;
+    private Long authorId;
 
-    public Book() {
-        super();
+    public BookDTO() {
     }
 
-    public Book(String title, String isbn, LocalDate publicationDate, Boolean available, Author author) {
+    public BookDTO(Long id, String title, String isbn, LocalDate publicationDate, Boolean available, Long authorId) {
+        this.id = id;
         this.title = title;
         this.isbn = isbn;
         this.publicationDate = publicationDate;
         this.available = available;
-        this.author = author;
+        this.authorId = authorId;
     }
 
     public Long getId() {
@@ -70,11 +63,23 @@ public class Book {
         this.available = available;
     }
 
-    public Author getAuthor() {
-        return author;
+    public Long getAuthor() {
+        return authorId;
     }
 
-    public void setAuthor(Author author) {
-        this.author = author;
+    public void setAuthor(Long authorId) {
+        this.authorId = authorId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        BookDTO bookDTO = (BookDTO) o;
+        return Objects.equals(id, bookDTO.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

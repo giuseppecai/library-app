@@ -1,41 +1,28 @@
-package net.giuse.biblioteca.Author;
+package net.giuse.biblioteca.author;
 
-import jakarta.persistence.*;
-import net.giuse.biblioteca.Book.Book;
+import net.giuse.biblioteca.book.BookDTO;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-@Entity
-public class Author {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class AuthorDTO {
     private Long id;
     private String name;
     private String surname;
     private LocalDate birthDate;
-    @OneToMany(mappedBy = "author", fetch = FetchType.EAGER)
-    private List<Book> books;
+    private List<BookDTO> books;
 
-    public Author() {
+    public AuthorDTO() {
 
     }
 
-    public Author(Long id, String name, String surname, LocalDate birthDate, List<Book> books) {
+    public AuthorDTO(Long id, String name, String surname, LocalDate birthDate, List<BookDTO> books) {
         this.id = id;
         this.name = name;
         this.surname = surname;
         this.birthDate = birthDate;
         this.books = books;
-    }
-
-    public Author(Long id, String name, String surname, LocalDate birthDate) {
-        this.id = id;
-        this.name = name;
-        this.surname = surname;
-        this.birthDate = birthDate;
-        this.books = new ArrayList<>();
     }
 
     public Long getId() {
@@ -70,21 +57,23 @@ public class Author {
         this.birthDate = birthDate;
     }
 
-    public List<Book> getBooks() {
+    public List<BookDTO> getBooks() {
         return books;
     }
 
-    public void setBooks(List<Book> books) {
+    public void setBooks(List<BookDTO> books) {
         this.books = books;
     }
 
-    public void addBook(Book book) {
-        books.add(book);
-        book.setAuthor(this);
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        AuthorDTO authorDTO = (AuthorDTO) o;
+        return Objects.equals(id, authorDTO.id);
     }
 
-    public void removeBook(Book book) {
-        book.setAuthor(null);
-        books.remove(book);
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, surname, birthDate, books);
     }
 }

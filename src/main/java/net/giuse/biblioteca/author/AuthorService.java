@@ -1,6 +1,4 @@
-package net.giuse.biblioteca.Author;
-
-import net.giuse.biblioteca.Book.BookDTO;
+package net.giuse.biblioteca.author;
 
 import java.time.LocalDate;
 import java.util.List;

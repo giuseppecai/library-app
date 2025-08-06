@@ -1,7 +1,7 @@
-package net.giuse.biblioteca.Author;
+package net.giuse.biblioteca.author;
 
-import net.giuse.biblioteca.Book.BookDTO;
-import net.giuse.biblioteca.Book.BookService;
+import net.giuse.biblioteca.book.BookDTO;
+import net.giuse.biblioteca.book.BookService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,11 +20,6 @@ public class AuthorController {
         this.bookService = bookService;
     }
 
-    @PostMapping("/")
-    public ResponseEntity<AuthorDTO> createAuthor(@RequestBody AuthorDTO authorDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(authorService.createAuthor(authorDto));
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<AuthorDTO> getAuthorById(@PathVariable Long id) {
         return ResponseEntity.ok(authorService.getAuthorById(id));
@@ -37,6 +32,11 @@ public class AuthorController {
             return ResponseEntity.ok(authorService.searchAuthorsByName(name));
         }
         return ResponseEntity.ok(authorService.getAllAuthors());
+    }
+
+    @PostMapping("/")
+    public ResponseEntity<AuthorDTO> createAuthor(@RequestBody AuthorDTO authorDto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(authorService.createAuthor(authorDto));
     }
 
     @PutMapping("/{id}")

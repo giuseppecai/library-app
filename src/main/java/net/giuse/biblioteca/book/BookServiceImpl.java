@@ -1,11 +1,12 @@
-package net.giuse.biblioteca.Book;
+package net.giuse.biblioteca.book;
 
-import net.giuse.biblioteca.Author.Author;
-import net.giuse.biblioteca.Author.AuthorMapper;
-import net.giuse.biblioteca.Author.AuthorRepository;
+import net.giuse.biblioteca.author.Author;
+import net.giuse.biblioteca.author.AuthorMapper;
+import net.giuse.biblioteca.author.AuthorRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BookServiceImpl implements BookService {
@@ -50,8 +51,14 @@ public class BookServiceImpl implements BookService {
         existingBook.setIsbn(bookDto.getIsbn());
         existingBook.setPublicationDate(bookDto.getPublicationDate());
         existingBook.setAvailable(bookDto.getAvailable());
-        Author a = authorRepository.findById(bookDto.getAuthor()).orElseThrow(() -> new RuntimeException("Author not found with id " + bookDto.getAuthor()));
-        existingBook.setAuthor(a);
+
+        if (bookDto.getAuthor() != null) {
+            Author a = authorRepository.findById(bookDto.getAuthor()).orElse(null);
+            existingBook.setAuthor(a);
+        } else {
+            existingBook.setAuthor(null);
+        }
+
         return bookMapper.toDto(bookRepository.save(existingBook));
     }
 
@@ -81,8 +88,10 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public List<BookDTO> findByAuthor(Long authorId) {
-        Author author = authorRepository.findById(authorId)
-                .orElseThrow(() -> new RuntimeException("Author not found with id " + authorId));
+        if (authorRepository.findById(authorId).isEmpty()) {
+            return List.of();
+        }
+        Author author = authorRepository.findById(authorId).orElse(null);
         return bookRepository.findByAuthor(author)
                 .stream()
                 .map(bookMapper::toDto)

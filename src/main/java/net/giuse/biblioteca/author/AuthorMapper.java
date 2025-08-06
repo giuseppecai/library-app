@@ -1,6 +1,6 @@
-package net.giuse.biblioteca.Author;
+package net.giuse.biblioteca.author;
 
-import net.giuse.biblioteca.Book.BookMapper;
+import net.giuse.biblioteca.book.BookMapper;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring", uses = BookMapper.class)
