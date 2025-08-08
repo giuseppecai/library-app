@@ -26,6 +26,10 @@ public class ResponseWrapper<T> {
         return new ResponseWrapper<>(true, message, data);
     }
 
+    public static <T> ResponseWrapper<T> failure() {
+        return new ResponseWrapper<>(false, "Generic error detected.", null);
+    }
+
     public static <T> ResponseWrapper<T> failure(String message) {
         return new ResponseWrapper<>(false, message, null);
     }

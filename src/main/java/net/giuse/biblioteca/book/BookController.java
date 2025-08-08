@@ -23,7 +23,7 @@ public class BookController {
         this.bookService = bookService;
     }
 
-    @Operation(summary = "Get all books, get books by author, by title or only available books")
+    @Operation(summary = "Get all books, get books by author, by title or only available books.")
     @ApiResponse(responseCode = "200", description = "List of books")
     @GetMapping("/")
     public ResponseEntity<ResponseWrapper<List<BookDTO>>> getAllBooks(
@@ -31,6 +31,9 @@ public class BookController {
             @RequestParam(required = false) String title,
             @RequestParam(required = false) Boolean available
     ) {
+        /* Creo la lista e il messaggio da restituire nel caso in cui la lista è vuota.
+        *  Dato che ci sono anche delle ricerche con params, ho deciso di creare dei
+        *  messaggi significativi in base al params utilizzato. */
         List<BookDTO> lists;
         String emptyListMessage = "No books found.";
 
@@ -44,15 +47,18 @@ public class BookController {
         }
         else if(authorId != null) {
             lists = bookService.findByAuthor(authorId);
-            emptyListMessage = "No books found with author id '" + authorId + "'.";
+            emptyListMessage = "No books found with author id " + authorId + ".";
         }
-        else lists = bookService.getAllBooks();
+        else
+            lists = bookService.getAllBooks();
 
-        if(lists.isEmpty()) return ResponseEntity.ok(ResponseWrapper.success(emptyListMessage, lists));
-        else return ResponseEntity.ok(ResponseWrapper.success("Books retrieved successfully.", lists));
+        if(lists.isEmpty())
+            return ResponseEntity.ok(ResponseWrapper.success(emptyListMessage, lists));
+        else
+            return ResponseEntity.ok(ResponseWrapper.success("Books retrieved successfully.", lists));
     }
 
-    @Operation(summary = "Find book with id")
+    @Operation(summary = "Find book with id.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Book retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Book not found")
@@ -60,32 +66,25 @@ public class BookController {
     @GetMapping("/{id}")
     public ResponseEntity<ResponseWrapper<BookDTO>> getBook(@PathVariable Long id) {
         BookDTO book = bookService.getBookById(id);
-        if(book != null) return ResponseEntity.ok(ResponseWrapper.success("Book retrieved successfully", bookService.getBookById(id)));
-        else return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(ResponseWrapper.failure("Book with id " + id + " not found"));
+        return ResponseEntity.ok(ResponseWrapper.success("Book retrieved successfully", book));
     }
 
-    @Operation(summary = "Create book")
+    @Operation(summary = "Create book.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Book successfully created"),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "409", description = "Conflict while updating the book"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping("/")
     public ResponseEntity<ResponseWrapper<BookDTO>> createBook(@RequestBody @Valid BookDTO bookDto) {
-        try {
-            return ResponseEntity
-                    .status(HttpStatus.CREATED)
-                    .body(ResponseWrapper.success(bookService.createBook(bookDto)));
-        } catch (Exception ex) {
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ResponseWrapper.failure("Internal server error"));
-        }
+        BookDTO created = bookService.createBook(bookDto);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ResponseWrapper.success("Book successfully created", created));
     }
 
-    @Operation(summary = "Update book")
+    @Operation(summary = "Update book.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Book updated successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
@@ -95,27 +94,35 @@ public class BookController {
     })
     @PutMapping("/{id}")
     public ResponseEntity<ResponseWrapper<BookDTO>> updateBook(@PathVariable Long id, @RequestBody @Valid BookDTO bookDto) {
-        try {
-            BookDTO updatedBook = bookService.updateBook(id, bookDto);
-            if (updatedBook != null) return ResponseEntity.ok(ResponseWrapper.success(updatedBook));
-            else return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(ResponseWrapper.failure("Book not found"));
-        } catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ResponseWrapper.failure("Unexpected error"));
-        }
+        BookDTO updatedBook = bookService.updateBook(id, bookDto);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ResponseWrapper.success("Book updated successfully", updatedBook));
     }
 
+    @Operation(summary = "Delete book.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Book deleted successfully, no content"),
+            @ApiResponse(responseCode = "404", description = "Book not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
         bookService.deleteBook(id);
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Verify if book is available.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Book verified successfully"),
+            @ApiResponse(responseCode = "404", description = "Book not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @GetMapping("/{id}/available")
-    public ResponseEntity<Boolean> isAvailable(@PathVariable Long id) {
-        return ResponseEntity.ok(bookService.isAvailable(id));
+    public ResponseEntity<ResponseWrapper<Boolean>> isAvailable(@PathVariable Long id) {
+        Boolean isAvailable = bookService.isAvailable(id);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ResponseWrapper.success("Book verified successfully", isAvailable));
     }
 }
