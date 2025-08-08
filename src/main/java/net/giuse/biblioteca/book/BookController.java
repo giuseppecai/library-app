@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import net.giuse.biblioteca.core.ResponseWrapper;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +23,10 @@ public class BookController {
     }
 
     @Operation(summary = "Get all books, get books by author, by title or only available books.")
-    @ApiResponse(responseCode = "200", description = "List of books")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "List of books"),
+            @ApiResponse(responseCode = "404", description = "Author not found")
+    })
     @GetMapping("/")
     public ResponseEntity<ResponseWrapper<List<BookDTO>>> getAllBooks(
             @RequestParam(required = false) Long authorId,
@@ -47,7 +49,7 @@ public class BookController {
         }
         else if(authorId != null) {
             lists = bookService.findByAuthor(authorId);
-            emptyListMessage = "No books found with author id " + authorId + ".";
+            emptyListMessage = "No books found with author ID " + authorId + ".";
         }
         else
             lists = bookService.getAllBooks();
@@ -66,7 +68,8 @@ public class BookController {
     @GetMapping("/{id}")
     public ResponseEntity<ResponseWrapper<BookDTO>> getBook(@PathVariable Long id) {
         BookDTO book = bookService.getBookById(id);
-        return ResponseEntity.ok(ResponseWrapper.success("Book retrieved successfully", book));
+        return ResponseEntity
+                .ok(ResponseWrapper.success("Book retrieved successfully", book));
     }
 
     @Operation(summary = "Create book.")
@@ -96,8 +99,7 @@ public class BookController {
     public ResponseEntity<ResponseWrapper<BookDTO>> updateBook(@PathVariable Long id, @RequestBody @Valid BookDTO bookDto) {
         BookDTO updatedBook = bookService.updateBook(id, bookDto);
         return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ResponseWrapper.success("Book updated successfully", updatedBook));
+                .ok(ResponseWrapper.success("Book with id " + id + " successfully updated", updatedBook));
     }
 
     @Operation(summary = "Delete book.")
@@ -107,9 +109,10 @@ public class BookController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
+    public ResponseEntity<ResponseWrapper<Void>> deleteBook(@PathVariable Long id) {
         bookService.deleteBook(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity
+                .ok(ResponseWrapper.success("Book with id " + id + " deleted successfully", null));
     }
 
     @Operation(summary = "Verify if book is available.")

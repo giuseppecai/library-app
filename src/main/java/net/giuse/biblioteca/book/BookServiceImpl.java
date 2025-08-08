@@ -3,6 +3,7 @@ package net.giuse.biblioteca.book;
 import net.giuse.biblioteca.author.Author;
 import net.giuse.biblioteca.author.AuthorMapper;
 import net.giuse.biblioteca.author.AuthorRepository;
+import net.giuse.biblioteca.author.exception.AuthorNotFoundException;
 import net.giuse.biblioteca.book.exception.BookConflictException;
 import net.giuse.biblioteca.book.exception.BookNotFoundException;
 import net.giuse.biblioteca.book.exception.InvalidBookDataException;
@@ -50,11 +51,9 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public List<BookDTO> findByAuthor(Long authorId) {
-        /* Se l'autore non esiste, restituisco una lista vuota. */
-        if (authorRepository.findById(authorId).isEmpty()) {
-            return List.of();
-        }
-        Author author = authorRepository.findById(authorId).orElse(null);
+        Author author = authorRepository.findById(authorId)
+                .orElseThrow(() -> new AuthorNotFoundException("Author with ID " + authorId + " not found"));
+
         return bookRepository.findByAuthor(author)
                 .stream()
                 .map(bookMapper::toDto)
@@ -63,10 +62,10 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookDTO getBookById(Long id) {
-        return bookMapper.toDto(
-                bookRepository.findById(id)
-                        .orElseThrow(() -> new BookNotFoundException("Book with id " + id + " not found"))
-        );
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new BookNotFoundException("Book with id " + id + " not found"));
+
+        return bookMapper.toDto(book);
     }
 
     @Override
@@ -81,7 +80,6 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookDTO updateBook(Long id, BookDTO bookDto) {
-
         /* cerco il libro con l'id fornito nei params, se non lo trovo eccezione BookNotFound */
         Book existingBook = bookRepository.findById(id)
                 .orElseThrow(() -> new BookNotFoundException("Book with ID " + id + " not found"));

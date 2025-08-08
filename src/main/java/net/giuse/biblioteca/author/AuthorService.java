@@ -10,9 +10,9 @@ public interface AuthorService {
     AuthorDTO updateAuthor(Long id, AuthorDTO authorDto);
     void deleteAuthor(Long id);
 
-    List<AuthorDTO> searchAuthorsByName(String name);
+    List<AuthorDTO> findAuthorsByName(String name);
     List<AuthorDTO> findByBirthDate(LocalDate birthDate);
 
-    void addBookToAuthor(Long authorId, Long bookId);
+    AuthorDTO addBookToAuthor(Long authorId, Long bookId);
     void removeBookFromAuthor(Long authorId, Long bookId);
 }

@@ -15,7 +15,7 @@ public class Author {
     private String name;
     private String surname;
     private LocalDate birthDate;
-    @OneToMany(mappedBy = "author", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "author", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Book> books;
 
     public Author() {
