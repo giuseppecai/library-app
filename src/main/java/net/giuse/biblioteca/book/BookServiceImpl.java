@@ -142,6 +142,4 @@ public class BookServiceImpl implements BookService {
                 .orElseThrow(() -> new RuntimeException("Book not found with id " + bookId));
         if(!b.getAvailable()) b.setAvailable(true);
     }
-
-
 }

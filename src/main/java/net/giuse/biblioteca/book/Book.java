@@ -2,8 +2,11 @@ package net.giuse.biblioteca.book;
 
 import jakarta.persistence.*;
 import net.giuse.biblioteca.author.Author;
+import net.giuse.biblioteca.loan.Loan;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -15,12 +18,25 @@ public class Book {
     private String isbn;
     private LocalDate publicationDate;
     private Boolean available;
+
     @ManyToOne
     @JoinColumn(name = "author_id")
     private Author author;
 
+    @OneToMany(mappedBy = "loan", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Loan> loans;
+
     public Book() {
         super();
+    }
+
+    public Book(String title, String isbn, LocalDate publicationDate, Boolean available, Author author, List<Loan> loans) {
+        this.title = title;
+        this.isbn = isbn;
+        this.publicationDate = publicationDate;
+        this.available = available;
+        this.author = author;
+        this.loans = loans;
     }
 
     public Book(String title, String isbn, LocalDate publicationDate, Boolean available, Author author) {
@@ -29,6 +45,7 @@ public class Book {
         this.publicationDate = publicationDate;
         this.available = available;
         this.author = author;
+        this.loans = new ArrayList<>();
     }
 
     public Long getId() {
@@ -79,6 +96,27 @@ public class Book {
         this.author = author;
     }
 
+    public List<Loan> getLoans() {
+        return loans;
+    }
+
+    public void setLoans(List<Loan> loans) {
+        this.loans = loans;
+    }
+
+    public void addLoan(Loan loan) {
+        if (!loans.contains(loan)) {
+            loans.add(loan);
+            loan.setBook(this);
+        }
+    }
+
+    public void removeLoan(Loan loan) {
+        if (loans.remove(loan)) {
+            loan.setBook(null);
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -89,6 +127,6 @@ public class Book {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, isbn, publicationDate, available, author);
+        return Objects.hash(id);
     }
 }
