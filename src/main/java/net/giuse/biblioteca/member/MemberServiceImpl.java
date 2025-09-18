@@ -92,30 +92,4 @@ public class MemberServiceImpl implements MemberService {
                 .map(memberMapper::toDto)
                 .toList();
     }
-
-    // richiedi prestito libro
-    @Override
-    public LoanDTO borrowBook(Long memberId, Long bookId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberNotFoundException("Member with id " + memberId + " not found"));
-
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new BookNotFoundException("Book with id " + bookId + " not found"));
-
-        Loan loan = loanService.createLoan(memberId, bookId);
-
-        return loanMapper.toDto(loan);
-    }
-
-    @Override
-    public void cancelLoan(Long loanId) {
-        loanService.cancelLoan(loanId);
-    }
-
-    @Override
-    public void returnLoan(Long loanId) {
-        Loan loan = loanService.getLoanById(loanId);
-        bookService.markAsReturned(loan.getBook().getId());
-        loanService.returnLoan(loanId);
-    }
 }

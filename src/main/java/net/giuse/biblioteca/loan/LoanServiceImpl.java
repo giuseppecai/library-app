@@ -1,31 +1,30 @@
 package net.giuse.biblioteca.loan;
 
 import net.giuse.biblioteca.book.Book;
-import net.giuse.biblioteca.book.BookDTO;
 import net.giuse.biblioteca.book.BookRepository;
-import net.giuse.biblioteca.book.BookService;
 import net.giuse.biblioteca.book.exception.*;
 import net.giuse.biblioteca.core.LibraryConfig;
 import net.giuse.biblioteca.loan.exception.*;
 import net.giuse.biblioteca.member.Member;
-import net.giuse.biblioteca.member.MemberDTO;
 import net.giuse.biblioteca.member.MemberRepository;
-import net.giuse.biblioteca.member.MemberService;
 import net.giuse.biblioteca.member.exception.*;
 import net.giuse.biblioteca.model.LoanStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
 public class LoanServiceImpl implements LoanService {
     private final LoanRepository loanRepository;
+    private final LoanMapper loanMapper;
     private final BookRepository bookRepository;
     private final MemberRepository memberRepository;
     private final LibraryConfig libraryConfig;
 
-    public LoanServiceImpl(LoanRepository loanRepository, BookRepository bookRepository, MemberRepository memberRepository, LibraryConfig libraryConfig) {
+    public LoanServiceImpl(LoanRepository loanRepository, LoanMapper loanMapper, BookRepository bookRepository, MemberRepository memberRepository, LibraryConfig libraryConfig) {
         this.loanRepository = loanRepository;
+        this.loanMapper = loanMapper;
         this.bookRepository = bookRepository;
         this.memberRepository = memberRepository;
         this.libraryConfig = libraryConfig;
@@ -33,18 +32,23 @@ public class LoanServiceImpl implements LoanService {
 
 
     @Override
-    public List<Loan> getAllLoans() {
-        return loanRepository.findAll();
+    public List<LoanDTO> getAllLoans() {
+        return loanRepository.findAll()
+                .stream()
+                .map(loanMapper::toDto)
+                .toList();
     }
 
     @Override
-    public Loan getLoanById(Long id) {
-        return loanRepository.findById(id)
+    public LoanDTO getLoanById(Long id) {
+        Loan loan = loanRepository.findById(id)
                 .orElseThrow(() -> new LoanNotFoundException("Loan with id " + id + " not found"));
+
+        return loanMapper.toDto(loan);
     }
 
     @Override
-    public Loan createLoan(Long memberId, Long bookId) {
+    public LoanDTO createLoan(Long memberId, Long bookId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException("Member with id " + memberId + " not found"));
 
@@ -65,17 +69,16 @@ public class LoanServiceImpl implements LoanService {
         loanRepository.save(loan);
         memberRepository.save(member);
         bookRepository.save(book);
-        return loan;
+        return loanMapper.toDto(loan);
     }
 
-    @Override
-    public Loan updateLoan(Long id, LoanDTO loanDTO) {
-        return null;
-    }
+
 
     @Override
     public void deleteLoan(Long id) {
-
+        Loan existingLoan = loanRepository.findById(id)
+                .orElseThrow(() -> new LoanNotFoundException("Loan with id " + id + " not found"));
+        loanRepository.delete(existingLoan);
     }
 
     @Override
@@ -127,6 +130,7 @@ public class LoanServiceImpl implements LoanService {
         if(loan.getStatus() != LoanStatus.ACTIVE)
             throw new LoanIllegalStateException("Loan can be returned only if in active state");
         loan.setStatus(LoanStatus.RETURNED);
+        loan.setReturnDate(LocalDate.now());
         loanRepository.save(loan);
 
         Book book = loan.getBook();

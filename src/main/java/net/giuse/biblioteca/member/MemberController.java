@@ -1,10 +1,12 @@
-package net.giuse.biblioteca.book;
+package net.giuse.biblioteca.member;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import net.giuse.biblioteca.book.BookDTO;
+import net.giuse.biblioteca.book.BookService;
 import net.giuse.biblioteca.core.ResponseWrapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,87 +16,80 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/books")
-@Tag(name = "Book", description = "Book controller")
-public class BookController {
+@Tag(name = "Member", description = "Member controller")
+public class MemberController {
+    private final MemberService memberService;
     private final BookService bookService;
 
-    public BookController(BookService bookService) {
+    public MemberController(MemberService memberService, BookService bookService) {
+        this.memberService = memberService;
         this.bookService = bookService;
     }
 
-
-    @Operation(summary = "Get all books, get books by author, by title or only available books.")
+    @Operation(summary = "Get all members or get member by name.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "List of books"),
-            @ApiResponse(responseCode = "404", description = "Author not found")
+            @ApiResponse(responseCode = "200", description = "List of members"),
+            @ApiResponse(responseCode = "404", description = "Member not found")
     })
     @GetMapping("/")
-    public ResponseEntity<ResponseWrapper<List<BookDTO>>> getAllBooks(
-            @RequestParam(required = false) Long authorId,
-            @RequestParam(required = false) String title,
-            @RequestParam(required = false) Boolean available
+    public ResponseEntity<ResponseWrapper<List<MemberDTO>>> getAllMembers(
+            @RequestParam(required = false) String memberName
     ) {
         /* Creo la lista e il messaggio da restituire nel caso in cui la lista è vuota.
-        *  Dato che ci sono anche delle ricerche con params, ho deciso di creare dei
-        *  messaggi significativi in base al params utilizzato. */
-        List<BookDTO> lists;
-        String emptyListMessage = "No books found.";
+         *  Dato che ci sono anche delle ricerche con params, ho deciso di creare dei
+         *  messaggi significativi in base al params utilizzato. */
+        List<MemberDTO> lists;
+        String emptyListMessage = "No members found.";
 
-        if(title != null)  {
-            lists = bookService.searchByTitle(title);
-            emptyListMessage = "No books found with title '" + title + "'.";
+        if (memberName != null) {
+            lists = memberService.findMembersByName(memberName);
+            emptyListMessage = "No members found with name '" + memberName + "'.";
+        } else {
+            lists = memberService.getAllMembers();
         }
-        else if(available != null) {
-            lists = bookService.findAvailableBooks();
-            emptyListMessage = "No books available found.";
-        }
-        else if(authorId != null) {
-            lists = bookService.findByAuthor(authorId);
-            emptyListMessage = "No books found with author ID " + authorId + ".";
-        }
-        else
-            lists = bookService.getAllBooks();
 
-        if(lists.isEmpty())
-            return ResponseEntity.ok(ResponseWrapper.success(emptyListMessage, lists));
-        else
-            return ResponseEntity.ok(ResponseWrapper.success("Books retrieved successfully.", lists));
+        if (lists.isEmpty()) {
+            return ResponseEntity
+                    .ok(ResponseWrapper.success(emptyListMessage, lists));
+        } else {
+            return ResponseEntity
+                    .ok(ResponseWrapper.success("Members retrieved successfully.", lists));
+        }
     }
 
 
-
-    @Operation(summary = "Find book with id.")
+    @Operation(summary = "Find member with id.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Book retrieved successfully"),
-            @ApiResponse(responseCode = "404", description = "Book not found")
+            @ApiResponse(responseCode = "200", description = "Member retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Member not found")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<ResponseWrapper<BookDTO>> getBook(@PathVariable Long id) {
-        BookDTO book = bookService.getBookById(id);
+    public ResponseEntity<ResponseWrapper<MemberDTO>> getBook(@PathVariable Long id) {
+        MemberDTO member = memberService.getMemberById(id);
         return ResponseEntity
-                .ok(ResponseWrapper.success("Book retrieved successfully", book));
+                .ok(ResponseWrapper.success("Member retrieved successfully", member));
     }
 
 
 
-    @Operation(summary = "Create book.")
+    @Operation(summary = "Create member.")
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Book successfully created"),
+            @ApiResponse(responseCode = "201", description = "Member successfully created"),
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
-            @ApiResponse(responseCode = "409", description = "Conflict while updating the book"),
+            @ApiResponse(responseCode = "409", description = "Conflict while updating the member"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping("/")
-    public ResponseEntity<ResponseWrapper<BookDTO>> createBook(@RequestBody @Valid BookDTO bookDto) {
-        BookDTO created = bookService.createBook(bookDto);
+    public ResponseEntity<ResponseWrapper<MemberDTO>> createBook(@RequestBody @Valid MemberDTO memberDTO) {
+        MemberDTO created = memberService.createMember(memberDTO);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ResponseWrapper.success("Book successfully created", created));
+                .body(ResponseWrapper.success("Member successfully created", created));
     }
 
 
 
-    @Operation(summary = "Update book.")
+    @Operation(summary = "Update member.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Book updated successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input data"),

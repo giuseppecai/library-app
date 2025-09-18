@@ -14,11 +14,4 @@ public interface MemberService {
     void deleteMember(Long id);
 
     List<MemberDTO> findMembersByName(String name);
-
-    // richiede un libro in prestito
-    LoanDTO borrowBook(Long memberId, Long bookId);
-    // annulla una richiesta non ancora presa in carico
-    void cancelLoan(Long loanId);
-    // restituzione di un prestito già richiesto e accettato
-    void returnLoan(Long loanId);
 }

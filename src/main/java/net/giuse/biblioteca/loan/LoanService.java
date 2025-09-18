@@ -7,11 +7,10 @@ import java.util.List;
 
 public interface LoanService {
 
-    List<Loan> getAllLoans();
-    Loan getLoanById(Long id);
+    List<LoanDTO> getAllLoans();
+    LoanDTO getLoanById(Long id);
 
-    Loan createLoan(Long memberId, Long bookId);
-    Loan updateLoan(Long id, LoanDTO loanDTO);
+    LoanDTO createLoan(Long memberId, Long bookId);
     void deleteLoan(Long id);
 
 
